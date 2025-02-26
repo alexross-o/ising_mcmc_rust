@@ -58,7 +58,7 @@ class MonteCarloResult:
         cmap: str = "viridis",
         figsize: Tuple[float, float] = (8, 8),
         dpi: int = 200,  # animation scales badly with dpi
-    ):
+    ) -> None:
         fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
         im = ax.imshow(self.results[0], cmap=cmap, vmin=-1, vmax=1, origin="lower")
 

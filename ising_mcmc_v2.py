@@ -101,16 +101,18 @@ def run_mc(
             lattice=curr_lattice, beta=beta, j_coupl=coupl_const, flip_frac=flip_frac
         )
 
-    sim_results = [curr_lattice]
+    sim_results = np.full(
+        (sim_steps + 1, lat_size, lat_size), fill_value=np.nan, dtype=np.int_
+    )
 
-    for i in range(sim_steps):
-        sim_results.append(
-            mc_step(
-                lattice=sim_results[-1],
-                beta=beta,
-                j_coupl=coupl_const,
-                flip_frac=flip_frac,
-            )
+    sim_results[0] = curr_lattice
+
+    for i in range(1, sim_steps + 1):
+        sim_results[i] = mc_step(
+            lattice=sim_results[i - 1],
+            beta=beta,
+            j_coupl=coupl_const,
+            flip_frac=flip_frac,
         )
 
     gc.collect()
@@ -205,6 +207,10 @@ if __name__ == "__main__":
                 }
             )
 
+    # the issue with parallelising it this way is that each lattice always starts "cold"
+    # if each worker was given a range of temperatures you could feed the end result of the last temp
+    # into the starting state of the next temp, this would save equilibration time
+    # or you could just equillibrate for a long time...
     results = parallel_process(
         arg_list=args, function=run_mc, n_jobs=os.cpu_count() - 2 or 1
     )
